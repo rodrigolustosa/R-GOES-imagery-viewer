@@ -23,7 +23,7 @@ source(file_functions)
 source(file_objects)
 
 
-# im <- cptec_imagery_names(ymd('2022-06-10'),as.numeric(19),
+# im <- cptec_datetime_names(ymd('2022-06-10'),as.numeric(19),
 #                     as.numeric(0)*10)
 # ch_code <- chanels_code[[which(names(chanels_code) == "ch_13")]]
 # 
@@ -106,11 +106,19 @@ print(dif)
 print(dif_2)
 print(dif_3)
 # values got from outputs above, using different number of pixels
-n_pix <- c(     29584,  473344, 2958400, 1893376, 1065024, 4262160)
-t_1   <- c(  11.11414,13.19177,14.05170,14.09384,13.39893,14.11108)
-t_2   <- c(0.02811718,1.274095,5.004652,3.624133,2.068337,7.192842)
-t_3   <- c( 0.9781375,1.277793,1.324653,1.063474,1.361005,1.163297)
+n_pix <- c(     29584,  473344, 1065024, 1893376, 2958400, 4262160)
+t_1   <- c(  11.11414,13.19177,13.39893,14.09384,14.05170,14.11108)
+t_2   <- c(0.02811718,1.274095,2.068337,3.624133,5.004652,7.192842)
+t_3   <- c( 0.9781375,1.277793,1.361005,1.063474,1.324653,1.163297)
 # plot data gotten above
 plot(n_pix,t_2,ylim=c(0,14.2),xlim=c(0,4262170))
 points(n_pix,t_1,col="blue")
 points(n_pix,t_3,col="red")
+# plot linear fit
+ajuste <- lm(t_2 ~ n_pix)
+coefs <- coef(ajuste)
+abline(coefs[1],coefs[2])
+# estimate time
+coefs[1] + coefs[2]*1100000
+# estimate number of pixels
+(8 - coefs[1])/coefs[2]

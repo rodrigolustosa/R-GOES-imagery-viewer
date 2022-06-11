@@ -9,7 +9,7 @@
 # library("XML")
 
 ## Cria nome das imagens a serem baixadas
-cptec_imagery_names <- function(datas = today(), horas = 0, minutos = 0){
+cptec_datetime_names <- function(datas = today(), horas = 0, minutos = 0){
   #formata vetores
   datas <- str_remove_all(datas, "-")
   horas <- ifelse(horas < 10, str_c("0",horas),as.character(horas))
@@ -44,11 +44,12 @@ chanels_names <- function(chanels = c(2,8,13)){
 }
 
 # download cptec goes 16
-download_cptec_data <- function(daterange,hours,minutes,chanels,dir_data="data/CPTEC/GOES16"){
+download_cptec_data <- function(daterange,hours,minutes,chanels,dir_data="data/CPTEC/GOES16",images_text=NULL){
   # inicializacoes
   ftp <- "http://ftp.cptec.inpe.br/goes/goes16/"
   # imagery names and chanels
-  images_text <- cptec_imagery_names(seq(daterange[1],daterange[2],1),hours,minutes)
+  if(is.null(images_text))
+    images_text <- cptec_datetime_names(seq(daterange[1],daterange[2],1),hours,minutes)
   chanels_text <- chanels_names(chanels)
   n_images <- length(images_text)
   n_chanels <- length(chanels_text)
@@ -90,6 +91,40 @@ download_cptec_data <- function(daterange,hours,minutes,chanels,dir_data="data/C
     }
   })
   
+}
+
+#pula linha do titulo dos mapas na plotagem, caso ele seja grande demais
+pula_linha <- function(nome, n = 60){
+  #numero de caracteres
+  n_characters <- str_count(nome)
+  #se o nome eh grande a ponto de precisar pular linha
+  if(n_characters > n){
+    #localiza boa posicao para pular linha (um traco com espacos)
+    traco <- str_locate_all(nome," - ")[[1]][,1]
+    #se essa posicao existe e esta em um lugar pulavel
+    if(length(traco) > 0 & any(traco <= n)){
+      #posicao do traco
+      o_traco <- max(traco[traco <= n])
+      #parte 1 do nome
+      nome_1 <- str_sub(nome,1,o_traco-1)
+      #parte 2 do nome
+      nome_2 <- str_sub(nome,o_traco,n_characters)
+      #nome com pulo de linha
+      nome <- str_c(nome_1,"\n",nome_2)
+    }else{
+      #posicao dos espacos
+      espacos <- str_locate_all(nome," - | ")[[1]][,1]
+      #ultimo espaco em um lugar pulavel
+      o_espaco <- max(espacos[espacos <= 60])
+      #parte 1 do nome
+      nome_1 <- str_sub(nome,1,o_espaco-1)
+      #parte 2 do nome
+      nome_2 <- str_sub(nome,o_espaco,n_characters)
+      #nome com pulo de linha
+      nome <- str_c(nome_1,"\n",nome_2)
+    }
+  }
+  return(nome)
 }
 
 # open netcdf file
