@@ -93,7 +93,7 @@ download_cptec_data <- function(daterange,hours,minutes,chanels,dir_data="data/C
 }
 
 # open netcdf file
-values_netcdf_file <- function(path){
+read_netcdf_data <- function(path){
   #abre arquivo
   ncin <- nc_open(path) #-- Abrindo o arquivo .nc
   #extrai valores

@@ -1,15 +1,16 @@
 # ----------------------------------------------------------------------- #
-# Information: 
+# Information:
 # Created by: Rodrigo Lustosa
 # Creation date:  9 Jun 2022 14:10 (GMT -03)
 # ----------------------------------------------------------------------- #
 
 # packages
 library(shiny)
-library(ncdf4)
 library(tidyverse)
 library(lubridate)
 library(RCurl)
+library(ncdf4)
+library(raster)
 library(fields)
 
 # directory and file names
@@ -19,16 +20,17 @@ file_objects <- "R/objects.R"
 
 # initializations
 app_version <- "Version 0.0.0"
+licence <- "Copyright (c) 2022 Rodrigo Lustosa"
 source(file_functions)
 source(file_objects)
 
 
 ui <- fluidPage(
-  # fixing checkbox alignment
+  # fixing checkbox alignment. solution from: https://stackoverflow.com/a/46493086/14874374
   tags$head(
     tags$style(
       HTML(
-        ".checkbox-inline { 
+        ".checkbox-inline {
                     margin-left: 0px;
                     margin-right: 10px;
           }
@@ -38,7 +40,7 @@ ui <- fluidPage(
           }
         "
       )
-    ) 
+    )
   ),
   # header
   h1("GOES Imagery Viewer"),
@@ -111,10 +113,10 @@ ui <- fluidPage(
                  #             value=ymd_h("20200101 02"),animate = TRUE),
                  # textOutput("test")
                )
-               ),
-             helpText(app_version)
+               )
+
              ),
-    
+
     # Download Tab
     tabPanel("Download Data",
              helpText(paste("Note: Viewer already downloads data if it is not already available.",
@@ -176,10 +178,14 @@ ui <- fluidPage(
              actionButton("download","Download"),
              # actionButton("cancel_d","Cancel"),
              # textOutput("test"),
-             br(),
-             br(),
-             helpText(app_version)
+             # br(),
+             # br(),
+             # helpText(app_version)
     )
+  ),
+  hr(),
+  fluidRow(column(6,helpText(licence)),
+           column(6,helpText(app_version), align = 'right')
   )
 )
 
@@ -188,10 +194,10 @@ server <- function(input, output) {
 
   # initializations ---------------------------------------------------------
   input_hours <- reactiveValues(last=0:24,last_d=0:24)
-  
-   
+
+
   # Viewer Tab --------------------------------------------------------------
-  
+
   # 'select all' or 'remove all' hours
   observe({
     added   <-      input$hours[!(input$hours %in% input_hours$last)]
@@ -219,9 +225,9 @@ server <- function(input, output) {
     # save last input hour
     input_hours$last <- input$hours
   })
-  
-  
-  
+
+
+
   ch_txt_1 <- reactive({str_c("ch" ,formatC(input$chanel,width = 2,flag=0))})
   ch_txt_2 <- reactive({str_c("ch_",formatC(input$chanel,width = 2,flag=0))})
   chanel_code <- reactive({chanels_code[[which(names(chanels_code) == ch_txt_2())]]})
@@ -232,8 +238,8 @@ server <- function(input, output) {
   files_names <- reactive({str_c(chanel_code(),"_",imagery_names(),".nc")})
   file_paths <- reactive({str_c("data/CPTEC/GOES16/",ch_txt_1(),"/",files_names())})
   n_files <- reactive({length(imagery_names())})
-  
-  
+
+
   observe({
     n <- n_files()
     updateSliderInput(inputId = "image", max = n,value = n)
@@ -256,18 +262,18 @@ server <- function(input, output) {
     #   final_interval <- as.difftime(1, units = "days")
     #   min_datetime <- max_datetime <- datetimes()[n]
     # }
-    # 
+    #
     # updateSliderInput(inputId = "image",step = final_interval,
     #                   min = min_datetime, max = max_datetime)
   })
-  
+
   goes_data <- reactive({
-    values_netcdf_file(file_paths()[input$image])
+    read_netcdf_data(file_paths()[input$image])
   })
   paleta <- pal.TbINPE
   divisoes <- val.TbINPE
   zlim <- c(-90, 55)
-  
+
   output$plot <- renderPlot({
     # par(mar = c(10,10,10,10))
     image.plot(z = goes_data()$values/100 - 273.15,
@@ -282,14 +288,14 @@ server <- function(input, output) {
                ylim = c(-20,0),
                zlim = zlim)
   }) %>% bindCache(input$dates,input$hours,input$min,input$image,input$chanel)
-  
-  
+
+
   # output$test <- renderText({input$image})
   # output$test <- renderText({goes_data()$lat})
   # output$test <- renderText({as.character(datetimes())})
-  
-  
-  
+
+
+
 
   # Downloader Tab ----------------------------------------------------------
   # 'select all' or 'remove all' hours
@@ -319,16 +325,16 @@ server <- function(input, output) {
     # save last input hour
     input_hours$last_d <- input$hours_d
   })
-  
-  
+
+
   observeEvent(input$download,{
     download_cptec_data(ymd(input$dates_d),as.numeric(input$hours_d),
                         as.numeric(input$min_d)*10,as.numeric(input$chanel_d),
                         dir_data=file.path(dir_data,"CPTEC/GOES16"))
   })
-  
-  
-  
+
+
+
 }
 
 shinyApp(ui, server)
