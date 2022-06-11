@@ -10,14 +10,17 @@ library(ncdf4)
 library(tidyverse)
 library(lubridate)
 library(RCurl)
+library(fields)
 
 # directory and file names
 dir_data <- "data"
 file_functions <- "R/functions.R"
+file_objects <- "R/objects.R"
 
 # initializations
 app_version <- "Version 0.0.0"
 source(file_functions)
+source(file_objects)
 
 
 ui <- fluidPage(
@@ -74,7 +77,8 @@ ui <- fluidPage(
                                          selectInput("comp","Composition",
                                                      choices = list("Air Mass"  = 1))))
                  ),
-               dateRangeInput("dates","Date Range"),
+               dateRangeInput("dates","Date Range",start = "2022-06-10",end = "2022-06-10"
+                                ),
                checkboxInput("show_time",label = "Show time selection",value = FALSE),
                conditionalPanel("input.show_time == 1",
                                 fluidRow(
@@ -90,14 +94,23 @@ ui <- fluidPage(
                                                         "select all" = 24,"remove all" = 25))),
                                   column(6,
                                          checkboxGroupInput("min",label = "Minutes",#width = "50%",
-                                                            selected = 0:5,#inline = TRUE,
+                                                            selected = 0,#inline = TRUE,
                                                             choices = list("00" = 0, "10" = 1,
                                                                            "20" = 2, "30" = 3,
                                                                            "40" = 4, "50" = 5)))
                                   )
                                 )
                ),
-               mainPanel()
+               mainPanel(
+                 plotOutput("plot"),
+                 sliderInput("image",label = "Image",animate = TRUE,
+                             min = 1,max = 1,step = 1,value=1),
+                 # sliderInput("image",label = "Actual date and time",
+                 #             min = ymd_h("20200101 01"),
+                 #             max = ymd_h("20200101 02"),step = as.difftime(10, units = "mins"),
+                 #             value=ymd_h("20200101 02"),animate = TRUE),
+                 # textOutput("test")
+               )
                ),
              helpText(app_version)
              ),
@@ -179,7 +192,7 @@ server <- function(input, output) {
    
   # Viewer Tab --------------------------------------------------------------
   
-  # select all or remove all hours
+  # 'select all' or 'remove all' hours
   observe({
     added   <-      input$hours[!(input$hours %in% input_hours$last)]
     removed <- input_hours$last[!(input_hours$last %in% input$hours)]
@@ -209,9 +222,77 @@ server <- function(input, output) {
   
   
   
+  ch_txt_1 <- reactive({str_c("ch" ,formatC(input$chanel,width = 2,flag=0))})
+  ch_txt_2 <- reactive({str_c("ch_",formatC(input$chanel,width = 2,flag=0))})
+  chanel_code <- reactive({chanels_code[[which(names(chanels_code) == ch_txt_2())]]})
+  hours <- reactive({input$hours[!(input$hours %in% 24:25)]})
+  imagery_names <- reactive({cptec_imagery_names(ymd(input$dates),as.numeric(hours()),
+                                                 as.numeric(input$min)*10)})
+  datetimes <- reactive({ymd_hm(imagery_names())})
+  files_names <- reactive({str_c(chanel_code(),"_",imagery_names(),".nc")})
+  file_paths <- reactive({str_c("data/CPTEC/GOES16/",ch_txt_1(),"/",files_names())})
+  n_files <- reactive({length(imagery_names())})
+  
+  
+  observe({
+    n <- n_files()
+    updateSliderInput(inputId = "image", max = n,value = n)
+    ### datetimes <- ymd_hm(imagery_names())
+    # if(n > 1){
+    #   ##### interval <- datetimes[n] - datetimes[n-1]
+    #   intervals <- datetimes()[2:n] - datetimes()[1:n-1]
+    #   max_interval <- max(intervals)
+    #   final_interval <- max_interval
+    #   max_datetime <- datetimes()[n]
+    #   min_datetime_real <- datetimes()[1]
+    #   prov_dates <- seq(max_datetime,min_datetime_real,-max_interval)
+    #   min_datetime <- min(prov_dates)
+    #   if(any(!(prov_dates %in% datetimes()))){
+    #     final_interval <- as.difftime(1, units = "days")
+    #     prov_dates <- seq(max_datetime,min_datetime_real,-final_interval)
+    #     min_datetime <- min(prov_dates)
+    #   }
+    # } else {
+    #   final_interval <- as.difftime(1, units = "days")
+    #   min_datetime <- max_datetime <- datetimes()[n]
+    # }
+    # 
+    # updateSliderInput(inputId = "image",step = final_interval,
+    #                   min = min_datetime, max = max_datetime)
+  })
+  
+  goes_data <- reactive({
+    values_netcdf_file(file_paths()[input$image])
+  })
+  paleta <- pal.TbINPE
+  divisoes <- val.TbINPE
+  zlim <- c(-90, 55)
+  
+  output$plot <- renderPlot({
+    # par(mar = c(10,10,10,10))
+    image.plot(z = goes_data()$values/100 - 273.15,
+               x = goes_data()$lon,
+               y = goes_data()$lat,
+               col = paleta,
+               breaks = divisoes,
+               # main = pula_linha(title),
+               xlab = "Longitude",
+               ylab = "Latitude",
+               xlim = c(-80,-60),
+               ylim = c(-20,0),
+               zlim = zlim)
+  }) %>% bindCache(input$dates,input$hours,input$min,input$image,input$chanel)
+  
+  
+  # output$test <- renderText({input$image})
+  # output$test <- renderText({goes_data()$lat})
+  # output$test <- renderText({as.character(datetimes())})
+  
+  
+  
 
   # Downloader Tab ----------------------------------------------------------
-  # select all or remove all hours
+  # 'select all' or 'remove all' hours
   observe({
     added   <-      input$hours_d[!(input$hours_d %in% input_hours$last_d)]
     removed <- input_hours$last_d[!(input_hours$last_d %in% input$hours_d)]
@@ -247,8 +328,6 @@ server <- function(input, output) {
   })
   
   
-  
-  output$test <- renderText({input$download})
   
 }
 

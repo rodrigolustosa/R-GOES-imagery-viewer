@@ -8,14 +8,6 @@
 # library("RCurl")
 # library("XML")
 
-#informacoes dos canais
-chanels_code <- list(ch_01 = "S10635333",ch_02 = "S10635334",ch_03 = "S10635335",
-                     ch_04 = "S10635336",ch_05 = "S10635337",ch_06 = "S10635338",
-                     ch_07 = "S10635339",ch_08 = "S10635340",ch_09 = "S10635341",
-                     ch_10 = "S10635342",ch_11 = "S10635344",ch_12 = "S10635345",
-                     ch_13 = "S10635346",ch_14 = "S10635347",ch_15 = "S10635348",
-                     ch_16 = "S10635349",cln = "S11632406")
-
 ## Cria nome das imagens a serem baixadas
 cptec_imagery_names <- function(datas = today(), horas = 0, minutos = 0){
   #formata vetores
@@ -33,7 +25,7 @@ cptec_imagery_names <- function(datas = today(), horas = 0, minutos = 0){
   datas <- sort(rep(datas, times = n_horas*n_minutos))
   horarios <- rep(horarios, times = n_datas)
   #retorna valor
-  imagens <- str_c(datas,horarios)
+  imagens <- sort(str_c(datas,horarios))
   return(imagens)
 }
 
@@ -80,7 +72,7 @@ download_cptec_data <- function(daterange,hours,minutes,chanels,dir_data="data/C
             arquivo <- str_c(codigo,"_",im,formato)
             path <- file.path(dir_data,ch,arquivo)
             endereco <- str_c(ftp,pastas,str_sub(im,1,4),"/",str_sub(im,5,6),"/",arquivo)
-            if(!file.exists(arquivo)){
+            if(!file.exists(path)){
               if(url.exists(endereco)){
                 if(!dir.exists(file.path(dir_data,ch)))
                   dir.create(file.path(dir_data,ch))
@@ -100,6 +92,18 @@ download_cptec_data <- function(daterange,hours,minutes,chanels,dir_data="data/C
   
 }
 
+# open netcdf file
+values_netcdf_file <- function(path){
+  #abre arquivo
+  ncin <- nc_open(path) #-- Abrindo o arquivo .nc
+  #extrai valores
+  values <- ncvar_get(ncin,"Band1")   #-- Extraindo a matriz das medicoes
+  lon <- ncvar_get(ncin,"lon") #-- Extraindo o vetor de coordenadas de longitude
+  lat <- ncvar_get(ncin,"lat") #-- Extraindo o vetor coordenadas de latitude
+  #fecha arquivo
+  nc_close(ncin)
+  return(list(values=values,lat=lat,lon=lon))
+}
 
 
 
