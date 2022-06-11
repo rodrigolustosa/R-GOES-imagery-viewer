@@ -5,29 +5,70 @@
 # ----------------------------------------------------------------------- #
 
 # packages
-library(tidyverse)
 library(shiny)
+library(ncdf4)
+library(tidyverse)
+library(lubridate)
+library(RCurl)
 
 # directory and file names
+dir_data <- "data"
+file_functions <- "R/functions.R"
 
+# initializations
+app_version <- "Version 0.0.0"
+source(file_functions)
 
 
 ui <- fluidPage(
+  # fixing checkbox alignment
+  tags$head(
+    tags$style(
+      HTML(
+        ".checkbox-inline { 
+                    margin-left: 0px;
+                    margin-right: 10px;
+          }
+         .checkbox-inline+.checkbox-inline {
+                    margin-left: 0px;
+                    margin-right: 10px;
+          }
+        "
+      )
+    ) 
+  ),
+  # header
   h1("GOES Imagery Viewer"),
+  # Tabs
   tabsetPanel(
-    tabPanel("Viewer",
+    # Viewer
+    tabPanel("Viewer [under develop.]",
              sidebarLayout(sidebarPanel(
                textInput("area_name",label = "Area name",value = "América do Sul"),
                selectInput("source","Data Source",choices = list("CPTEC/INPE" = 1)),
+               selectInput("goes","Satellite",choices = list("GOES 16" = 16)),
                fluidRow(
                  column(6,selectInput("type","Data type",choices = list("Chanels"         = 1,
                                                                         "RGB compositions"= 2))),
                  column(6,
                         conditionalPanel("input.type == 1",
                                          selectInput("chanel","Chanel",selected = 13,
-                                                     choices = list("ch1"  = 1,
-                                                                    "ch2"  = 2,
-                                                                    "ch13" = 13)
+                                                     choices = list("CH01" =  1,
+                                                                    "CH02" =  2,
+                                                                    "CH03" =  3,
+                                                                    "CH04" =  4,
+                                                                    "CH05" =  5,
+                                                                    "CH06" =  6,
+                                                                    "CH07" =  7,
+                                                                    "CH08" =  8,
+                                                                    "CH09" =  9,
+                                                                    "CH10" = 10,
+                                                                    "CH11" = 11,
+                                                                    "CH12" = 12,
+                                                                    "CH13" = 13,
+                                                                    "CH14" = 14,
+                                                                    "CH15" = 15,
+                                                                    "CH16" = 16)
                                                      )),
                         conditionalPanel("input.type == 2",
                                          selectInput("comp","Composition",
@@ -58,9 +99,10 @@ ui <- fluidPage(
                ),
                mainPanel()
                ),
-             helpText("Version 0.0.0")
+             helpText(app_version)
              ),
     
+    # Download Tab
     tabPanel("Download Data",
              helpText(paste("Note: Viewer already downloads data if it is not already available.",
                             "This tab was made for cases where you want to view many images,",
@@ -68,16 +110,30 @@ ui <- fluidPage(
                             "It also works for cases where you just want to download data to use elsewhere.")),
              fluidRow(column(4,
                              selectInput("source_d","Data Source",choices = list("CPTEC/INPE" = 1)),
+                             selectInput("goes_d","Satellite",choices = list("GOES 16" = 16)),
                              checkboxGroupInput("type_d","Data type",choices = list("Chanels"         = 1,
-                                                                                    "RGB compositions"= 2)),
+                                                                                    "RGB compositions [under develop.]"= 2)),
                              conditionalPanel("input.type_d.includes('1')",
-                                              checkboxGroupInput("chanel_d","Chanel",#selected = 13,
-                                                                 choices = list("ch1"  = 1,
-                                                                                "ch2"  = 2,
-                                                                                "ch13" = 13))
+                                              checkboxGroupInput("chanel_d","Chanel",inline = TRUE,#selected = 13,
+                                                                 choices = list("CH01" =  1,
+                                                                                "CH02" =  2,
+                                                                                "CH03" =  3,
+                                                                                "CH04" =  4,
+                                                                                "CH05" =  5,
+                                                                                "CH06" =  6,
+                                                                                "CH07" =  7,
+                                                                                "CH08" =  8,
+                                                                                "CH09" =  9,
+                                                                                "CH10" = 10,
+                                                                                "CH11" = 11,
+                                                                                "CH12" = 12,
+                                                                                "CH13" = 13,
+                                                                                "CH14" = 14,
+                                                                                "CH15" = 15,
+                                                                                "CH16" = 16))
                              ),
                              conditionalPanel("input.type_d.includes('2')",
-                                              checkboxGroupInput("comp_d","Composition",
+                                              checkboxGroupInput("comp_d","Composition",inline = TRUE,
                                                                  choices = list("Air Mass"  = 1)))
              ),
              column(4,
@@ -104,6 +160,12 @@ ui <- fluidPage(
                                      )
                     )
              )),
+             actionButton("download","Download"),
+             # actionButton("cancel_d","Cancel"),
+             # textOutput("test"),
+             br(),
+             br(),
+             helpText(app_version)
     )
   )
 )
@@ -111,8 +173,12 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
+  # initializations ---------------------------------------------------------
+  input_hours <- reactiveValues(last=0:24,last_d=0:24)
+  
+   
   # Viewer Tab --------------------------------------------------------------
-  input_hours <- reactiveValues(last=0:24)
+  
   # select all or remove all hours
   observe({
     added   <-      input$hours[!(input$hours %in% input_hours$last)]
@@ -145,11 +211,10 @@ server <- function(input, output) {
   
 
   # Downloader Tab ----------------------------------------------------------
-  input_hours_d <- reactiveValues(last=0:24)
   # select all or remove all hours
   observe({
-    added   <-      input$hours_d[!(input$hours_d %in% input_hours_d$last)]
-    removed <- input_hours_d$last[!(input_hours_d$last %in% input$hours_d)]
+    added   <-      input$hours_d[!(input$hours_d %in% input_hours$last_d)]
+    removed <- input_hours$last_d[!(input_hours$last_d %in% input$hours_d)]
     # when new box was added to hours
     if (length(added) > 0){
       # if 'remove all' was added
@@ -171,8 +236,19 @@ server <- function(input, output) {
                                  selected = input$hours_d[input$hours_d != 24])
     }
     # save last input hour
-    input_hours_d$last <- input$hours_d
+    input_hours$last_d <- input$hours_d
   })
+  
+  
+  observeEvent(input$download,{
+    download_cptec_data(ymd(input$dates_d),as.numeric(input$hours_d),
+                        as.numeric(input$min_d)*10,as.numeric(input$chanel_d),
+                        dir_data=file.path(dir_data,"CPTEC/GOES16"))
+  })
+  
+  
+  
+  output$test <- renderText({input$download})
   
 }
 
