@@ -248,28 +248,46 @@ server <- function(input, output) {
 
   # imagery inputs
   # ch_txt_1 <- reactive({str_c("ch" ,formatC(as.numeric(input$channel),width = 2,flag=0))})
-  ch_txt_2 <- isolate({channels_names(as.numeric(input$channel))})
-  channel_code <- isolate({channels_code[[which(names(channels_code) == ch_txt_2())]]})
-  hours <- isolate({input$hours[!(input$hours %in% 24:25)]})
-  dates <- isolate({seq(ymd(input$dates[1]),ymd(input$dates[2]),1)})
-  datetime_names <- isolate({cptec_datetime_names(dates(),as.numeric(hours()),
-                                                 as.numeric(input$min)*10)})
-  dates4title <- isolate({str_replace(datetime_names(), 
-                                       "(^\\d{4})(\\d{2})(\\d{2})(\\d{4})","\\1-\\2-\\3 \\4UTC")})
-  datetimes <- isolate({ymd_hm(datetime_names())})
-  files_names <- isolate({str_c(channel_code(),"_",datetime_names(),".nc")})
-  file_paths <- isolate({str_c("data/CPTEC/GOES16/",str_remove(ch_txt_2(),"_"),"/",files_names())})
-  n_files <- isolate({length(datetime_names())})
+  # imagery_info <- eventReactive(input$update,{list(all_bellow)})
+  channels_text <- eventReactive(input$update,{
+    channels_names(as.numeric(input$channel))
+    },ignoreNULL = FALSE)
+  channel_code <- eventReactive(input$update,{
+    channels_code[[which(names(channels_code) == channels_text())]]
+    },ignoreNULL = FALSE)
+  hours <- eventReactive(input$update,{
+    input$hours[!(input$hours %in% 24:25)]
+    },ignoreNULL = FALSE)
+  dates <- eventReactive(input$update,{
+    seq(ymd(input$dates[1]),ymd(input$dates[2]),1)
+    },ignoreNULL = FALSE)
+  datetime_names <- eventReactive(input$update,{
+    cptec_datetime_names(dates(),as.numeric(hours()),as.numeric(input$min)*10)
+    },ignoreNULL = FALSE)
+  dates4title <- eventReactive(input$update,{
+    str_replace(datetime_names(),"(^\\d{4})(\\d{2})(\\d{2})(\\d{4})","\\1-\\2-\\3 \\4UTC")
+    },ignoreNULL = FALSE)
+  datetimes <- eventReactive(input$update,{ymd_hm(datetime_names())},ignoreNULL = FALSE)
+  files_names <- eventReactive(input$update,{
+    str_c(channel_code(),"_",datetime_names(),".nc")
+    },ignoreNULL = FALSE)
+  file_paths <- eventReactive(input$update,{
+    str_c("data/CPTEC/GOES16/",str_remove(channels_text(),"_"),"/",files_names())
+    },ignoreNULL = FALSE)
+  n_files <- eventReactive(input$update,{length(datetime_names())},ignoreNULL = FALSE)
   # update slider with number of images to be displayed
   observe({
-    n <- n_files()
+    input$update
+    n <- isolate({n_files()})
     updateSliderInput(inputId = "image", max = n,value = n)
   })
   # read data
   # inputs: image, channel, lat, lon; dates, hours, min
-  goes_data <- isolate({
+  # cond_read_data <- reactive({list(input$update,input$image)})
+  goes_data <- eventReactive(c(input$update,input$image),{
     if(!file.exists(file_paths()[input$image])){
-      download_cptec_data(images_text=datetime_names()[input$image],channels=as.numeric(input$channel),
+      download_cptec_data(images_text=datetime_names()[input$image],
+                          channels=as.numeric(input$channel),
                           dir_data=file.path(dir_data,"CPTEC/GOES16"))
     }
     if(file.exists(file_paths()[input$image])){
@@ -293,13 +311,12 @@ server <- function(input, output) {
       }
       # if(input$channel == "13")
       # final_data <- final_data
-      list(data=final_data,
-           read_with_raster=read_data_with_raster)
+      list(data=final_data,read_with_raster=read_data_with_raster)
     }
-  })
+  },ignoreNULL = FALSE)
   # palette initialization
   # inputs: channel
-  plot_info <- reactive({
+  plot_info <- eventReactive(input$update,{
     if(as.numeric(input$channel) %in% 1:6){
       palette <- pal.Rfl;breaks <- val.Rfl;zlim <- c(0, 100)
     }
@@ -310,10 +327,10 @@ server <- function(input, output) {
       palette <- pal.TbINPE;breaks <- val.TbINPE;zlim <- c(-90, 55)
     }
     return(list(palette=palette,breaks=breaks,zlim=zlim))
-  })
+  },ignoreNULL = FALSE)
   # title plot
   # inputs: channel, image, area_name; dates, hours, min
-  title <- reactive({
+  title <- eventReactive(input$update,{
     if(as.numeric(input$channel) %in% 1:2)
       abbreviation <- " (VIS) "
     if(as.numeric(input$channel) %in% 3:6)
@@ -325,42 +342,46 @@ server <- function(input, output) {
     if(as.numeric(input$channel) %in% c(7,11:16))
       abbreviation <- " (IR) "
     str_c("GOES-16 CH",formatC(as.numeric(input$channel),width = 2,flag = 0),
-          abbreviation,dates4title()[input$image]," - ",input$area_name
+          abbreviation,dates4title()," - ",input$area_name
           )
-  })
+  },ignoreNULL = FALSE)
   
   # plot
   # inputs: update; channel, image, area_name, dates, hours, min
   output$plot <- renderPlot({
     input$update
-    # par(mar = c(10,10,10,10))
-    if(length(goes_data()) == 0)
-      return()
-    if(goes_data()$read_with_raster){
-      image.plot(goes_data()$data,
-                 col = plot_info()$palette,
-                 breaks = plot_info()$breaks,
-                 main = pula_linha(title()),
-                 xlab = "Longitude",
-                 ylab = "Latitude",
-                 xlim = c(-80,-60),
-                 ylim = c(-20,0),
-                 zlim = plot_info()$zlim)
-    } else {
-      image.plot(z = goes_data()$data$values,
-                 x = goes_data()$data$lon,
-                 y = goes_data()$data$lat,
-                 col = plot_info()$palette,
-                 breaks = plot_info()$breaks,
-                 main = pula_linha(title()),
-                 xlab = "Longitude",
-                 ylab = "Latitude",
-                 xlim = c(-80,-60),
-                 ylim = c(-20,0),
-                 zlim = plot_info()$zlim)
-    }
+    input$image
     
-  }) %>% bindCache(datetime_names()[input$image],input$channel)
+      # par(mar = c(10,10,10,10))
+      if(length(goes_data()) == 0)
+        return()
+      if(goes_data()$read_with_raster){
+        image.plot(isolate({goes_data()$data}),
+                   col = isolate({plot_info()$palette}),
+                   breaks = isolate({plot_info()$breaks}),
+                   main = isolate({pula_linha(title()[input$image])}),
+                   xlab = "Longitude",
+                   ylab = "Latitude",
+                   xlim = c(-80,-60),
+                   ylim = c(-20,0),
+                   zlim = isolate({plot_info()$zlim}))
+      } else {
+        image.plot(z = isolate({goes_data()$data$values}),
+                   x = isolate({goes_data()$data$lon}),
+                   y = isolate({goes_data()$data$lat}),
+                   col = isolate({plot_info()$palette}),
+                   breaks = isolate({plot_info()$breaks}),
+                   main = isolate({pula_linha(title()[input$image])}),
+                   xlab = "Longitude",
+                   ylab = "Latitude",
+                   xlim = c(-80,-60),
+                   ylim = c(-20,0),
+                   zlim = isolate({plot_info()$zlim}))
+      }
+    
+  }) %>% bindCache(length(goes_data()) == 0,
+                   datetime_names()[input$image],
+                   isolate(input$channel))
 
 
   output$test <- renderText({file_paths()[input$image]})
