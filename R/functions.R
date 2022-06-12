@@ -30,34 +30,34 @@ cptec_datetime_names <- function(datas = today(), horas = 0, minutos = 0){
 }
 
 #retorna canais em texto
-chanels_names <- function(chanels = c(2,8,13)){
+channels_names <- function(channels = c(2,8,13)){
   ch <- vector(length = 0)
-  if(any(chanels < 10))
-    ch <- c(ch, str_c("ch_0",chanels[chanels < 10]))
-  if(any(chanels >= 10 & chanels <= 16))
-    ch <- c(ch, str_c("ch_",chanels[chanels >= 10 & chanels <= 16]))
-  if(17 %in% chanels)
+  if(any(channels < 10))
+    ch <- c(ch, str_c("ch_0",channels[channels < 10]))
+  if(any(channels >= 10 & channels <= 16))
+    ch <- c(ch, str_c("ch_",channels[channels >= 10 & channels <= 16]))
+  if(17 %in% channels)
     ch <- c(ch,"cln")
-  # if(18 %in% chanels)
+  # if(18 %in% channels)
   #   ch <- c(ch,"glm")
   return(ch)
 }
 
 # download cptec goes 16
-download_cptec_data <- function(daterange,hours,minutes,chanels,dir_data="data/CPTEC/GOES16",images_text=NULL){
+download_cptec_data <- function(daterange,hours,minutes,channels,dir_data="data/CPTEC/GOES16",images_text=NULL){
   # inicializacoes
   ftp <- "http://ftp.cptec.inpe.br/goes/goes16/"
-  # imagery names and chanels
+  # imagery names and channels
   if(is.null(images_text))
     images_text <- cptec_datetime_names(seq(daterange[1],daterange[2],1),hours,minutes)
-  chanels_text <- chanels_names(chanels)
+  channels_text <- channels_names(channels)
   n_images <- length(images_text)
-  n_chanels <- length(chanels_text)
+  n_channels <- length(channels_text)
   # baixa arquivos
   withProgress(message=str_c("Downloading images"),value=0,{
-    for(ch in chanels_text){
-      nom_ch <- names(chanels_code)
-      codigo <- chanels_code[[which(nom_ch %in% ch)]]
+    for(ch in channels_text){
+      nom_ch <- names(channels_code)
+      codigo <- channels_code[[which(nom_ch %in% ch)]]
       ch <- str_remove_all(ch,"_") #formato do site do impe
       #para os canais
       if(ch == "cln" | str_sub(ch,1,2) == "ch"){
@@ -87,7 +87,7 @@ download_cptec_data <- function(daterange,hours,minutes,chanels,dir_data="data/C
         })
         
       }
-      incProgress(1/n_chanels)
+      incProgress(1/n_channels)
     }
   })
   

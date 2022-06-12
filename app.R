@@ -22,6 +22,8 @@ file_objects <- "R/objects.R"
 # initialization
 app_version <- "Version 0.0.0"
 licence <- "Copyright (c) 2022 Rodrigo Lustosa"
+
+# source functions and objects
 source(file_functions)
 source(file_objects)
 
@@ -59,11 +61,11 @@ ui <- fluidPage(
                  column(6,selectInput("goes","Satellite",choices = list("GOES 16" = 16)))
                ),
                fluidRow(
-                 column(6,selectInput("type","Data type",choices = list("Chanels"         = 1,
+                 column(6,selectInput("type","Data type",choices = list("Channels"         = 1,
                                                                         "RGB compositions"= 2))),
                  column(6,
                         conditionalPanel("input.type == 1",
-                                         selectInput("chanel","Chanel",selected = 13,
+                                         selectInput("channel","Channel",selected = 13,
                                                      choices = list("CH01" =  1,
                                                                     "CH02" =  2,
                                                                     "CH03" =  3,
@@ -136,10 +138,10 @@ ui <- fluidPage(
              fluidRow(column(4,
                              selectInput("source_d","Data Source",choices = list("CPTEC/INPE" = 1)),
                              selectInput("goes_d","Satellite",choices = list("GOES 16" = 16)),
-                             checkboxGroupInput("type_d","Data type",choices = list("Chanels"         = 1,
+                             checkboxGroupInput("type_d","Data type",choices = list("Channels"         = 1,
                                                                                     "RGB compositions [under develop.]"= 2)),
                              conditionalPanel("input.type_d.includes('1')",
-                                              checkboxGroupInput("chanel_d","Chanel",inline = TRUE,#selected = 13,
+                                              checkboxGroupInput("channel_d","Channel",inline = TRUE,#selected = 13,
                                                                  choices = list("CH01" =  1,
                                                                                 "CH02" =  2,
                                                                                 "CH03" =  3,
@@ -245,28 +247,29 @@ server <- function(input, output) {
 
 
   # imagery inputs
-  # ch_txt_1 <- reactive({str_c("ch" ,formatC(as.numeric(input$chanel),width = 2,flag=0))})
-  ch_txt_2 <- reactive({chanels_names(as.numeric(input$chanel))})
-  chanel_code <- reactive({chanels_code[[which(names(chanels_code) == ch_txt_2())]]})
-  hours <- reactive({input$hours[!(input$hours %in% 24:25)]})
-  dates <- reactive({seq(ymd(input$dates[1]),ymd(input$dates[2]),1)})
-  datetime_names <- reactive({cptec_datetime_names(dates(),as.numeric(hours()),
+  # ch_txt_1 <- reactive({str_c("ch" ,formatC(as.numeric(input$channel),width = 2,flag=0))})
+  ch_txt_2 <- isolate({channels_names(as.numeric(input$channel))})
+  channel_code <- isolate({channels_code[[which(names(channels_code) == ch_txt_2())]]})
+  hours <- isolate({input$hours[!(input$hours %in% 24:25)]})
+  dates <- isolate({seq(ymd(input$dates[1]),ymd(input$dates[2]),1)})
+  datetime_names <- isolate({cptec_datetime_names(dates(),as.numeric(hours()),
                                                  as.numeric(input$min)*10)})
-  dates4title <- reactive({str_replace(datetime_names(), 
+  dates4title <- isolate({str_replace(datetime_names(), 
                                        "(^\\d{4})(\\d{2})(\\d{2})(\\d{4})","\\1-\\2-\\3 \\4UTC")})
-  datetimes <- reactive({ymd_hm(datetime_names())})
-  files_names <- reactive({str_c(chanel_code(),"_",datetime_names(),".nc")})
-  file_paths <- reactive({str_c("data/CPTEC/GOES16/",str_remove(ch_txt_2(),"_"),"/",files_names())})
-  n_files <- reactive({length(datetime_names())})
+  datetimes <- isolate({ymd_hm(datetime_names())})
+  files_names <- isolate({str_c(channel_code(),"_",datetime_names(),".nc")})
+  file_paths <- isolate({str_c("data/CPTEC/GOES16/",str_remove(ch_txt_2(),"_"),"/",files_names())})
+  n_files <- isolate({length(datetime_names())})
   # update slider with number of images to be displayed
   observe({
     n <- n_files()
     updateSliderInput(inputId = "image", max = n,value = n)
   })
   # read data
-  goes_data <- reactive({
+  # inputs: image, channel, lat, lon; dates, hours, min
+  goes_data <- isolate({
     if(!file.exists(file_paths()[input$image])){
-      download_cptec_data(images_text=datetime_names()[input$image],chanels=as.numeric(input$chanel),
+      download_cptec_data(images_text=datetime_names()[input$image],channels=as.numeric(input$channel),
                           dir_data=file.path(dir_data,"CPTEC/GOES16"))
     }
     if(file.exists(file_paths()[input$image])){
@@ -276,7 +279,7 @@ server <- function(input, output) {
       if(n_pixels <= n_pixels_min_raster){
         read_data_with_raster <- FALSE
         data_prov_values <- data_prov$values/100 # - 273.15
-        if(as.numeric(input$chanel) >= 7) data_prov_values <- data_prov_values - 273.15
+        if(as.numeric(input$channel) >= 7) data_prov_values <- data_prov_values - 273.15
         i_s <- (which((data_prov$lon - (-80)) >= 0)[1]):(max(which((data_prov$lon - (-60)) <= 0)))
         j_s <- (which((data_prov$lat - (-20)) >= 0)[1]):(max(which((data_prov$lat - 0) <= 0)))
         # i_s <- (which((data_prov$lon - xlim[1]) >= 0)[1]):(max(which((data_prov$lon - xlim[2]) <= 0)))
@@ -285,46 +288,51 @@ server <- function(input, output) {
                            lon = data_prov$lon[i_s],lat=data_prov$lat[j_s])
       }else{ # read data with raster
         final_data <- raster(file_paths()[input$image])/100 #- 273.15
-        if(as.numeric(input$chanel) >= 7) data_prov_values <- data_prov_values - 273.15
+        if(as.numeric(input$channel) >= 7) data_prov_values <- data_prov_values - 273.15
         read_data_with_raster <- TRUE
       }
-      # if(input$chanel == "13")
+      # if(input$channel == "13")
       # final_data <- final_data
       list(data=final_data,
            read_with_raster=read_data_with_raster)
     }
   })
   # palette initialization
+  # inputs: channel
   plot_info <- reactive({
-    if(as.numeric(input$chanel) %in% 1:6){
+    if(as.numeric(input$channel) %in% 1:6){
       palette <- pal.Rfl;breaks <- val.Rfl;zlim <- c(0, 100)
     }
-    if(as.numeric(input$chanel) %in% 8:10){
+    if(as.numeric(input$channel) %in% 8:10){
       palette <- pal.Wv;breaks <- val.Wv;zlim <- c(-90, 55)
     }
-    if(as.numeric(input$chanel) %in% c(7,11:16)){
+    if(as.numeric(input$channel) %in% c(7,11:16)){
       palette <- pal.TbINPE;breaks <- val.TbINPE;zlim <- c(-90, 55)
     }
     return(list(palette=palette,breaks=breaks,zlim=zlim))
   })
-  
+  # title plot
+  # inputs: channel, image, area_name; dates, hours, min
   title <- reactive({
-    if(as.numeric(input$chanel) %in% 1:2)
+    if(as.numeric(input$channel) %in% 1:2)
       abbreviation <- " (VIS) "
-    if(as.numeric(input$chanel) %in% 3:6)
+    if(as.numeric(input$channel) %in% 3:6)
       abbreviation <- " (NIR) "
-    if(as.numeric(input$chanel) %in% 7)
+    if(as.numeric(input$channel) %in% 7)
       abbreviation <- " (SWIR) "
-    if(as.numeric(input$chanel) %in% 8:10)
+    if(as.numeric(input$channel) %in% 8:10)
       abbreviation <- " (WV) "
-    if(as.numeric(input$chanel) %in% c(7,11:16))
+    if(as.numeric(input$channel) %in% c(7,11:16))
       abbreviation <- " (IR) "
-    str_c("GOES-16 CH",formatC(as.numeric(input$chanel),width = 2,flag = 0),
+    str_c("GOES-16 CH",formatC(as.numeric(input$channel),width = 2,flag = 0),
           abbreviation,dates4title()[input$image]," - ",input$area_name
           )
   })
-
+  
+  # plot
+  # inputs: update; channel, image, area_name, dates, hours, min
   output$plot <- renderPlot({
+    input$update
     # par(mar = c(10,10,10,10))
     if(length(goes_data()) == 0)
       return()
@@ -352,7 +360,7 @@ server <- function(input, output) {
                  zlim = plot_info()$zlim)
     }
     
-  }) %>% bindCache(datetime_names()[input$image],input$chanel)
+  }) %>% bindCache(datetime_names()[input$image],input$channel)
 
 
   output$test <- renderText({file_paths()[input$image]})
@@ -399,7 +407,7 @@ server <- function(input, output) {
   # download data
   observeEvent(input$download,{
     download_cptec_data(ymd(input$dates_d),as.numeric(input$hours_d),
-                        as.numeric(input$min_d)*10,as.numeric(input$chanel_d),
+                        as.numeric(input$min_d)*10,as.numeric(input$channel_d),
                         dir_data=file.path(dir_data,"CPTEC/GOES16"))
   })
 

@@ -25,7 +25,7 @@ source(file_objects)
 
 # im <- cptec_datetime_names(ymd('2022-06-10'),as.numeric(19),
 #                     as.numeric(0)*10)
-# ch_code <- chanels_code[[which(names(chanels_code) == "ch_13")]]
+# ch_code <- channels_code[[which(names(channels_code) == "ch_13")]]
 # 
 # path <- str_c("data/CPTEC/GOES16/ch13/",str_c(ch_code,"_",im,".nc"))
 path <- "data/CPTEC/GOES16/ch13/S10635346_202206101900.nc"
