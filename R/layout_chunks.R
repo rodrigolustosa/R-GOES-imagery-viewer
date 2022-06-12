@@ -28,7 +28,7 @@ fix_checkbox_alignment <-
 # sidebar layout and buttons
 sidebar_inputs <- sidebarPanel(
   # area name to be ploted in title and file name
-  textInput("area_name",label = "Area name",value = "América do Sul"),
+  textInput("area_name",label = "Area name",value = "Latin America"),
   # data source information for download
   fluidRow(
     column(6,selectInput("source","Data Source",choices = list("CPTEC/INPE" = 1))),
@@ -86,14 +86,14 @@ sidebar_inputs <- sidebarPanel(
     )
   ),
   # map limits
-  # fluidRow(
-  #   column(6,numericInput("latmin","Min. Latitude",value =  -80,min = -90,max = 90)),
-  #   column(6,numericInput("latmax","Max. Latitude",value =   20,min = -90,max = 90)),
-  # ),
-  # fluidRow(
-  #   column(6,numericInput("lonmin","Min. Longitude",value =-110,min = -90,max = 90)),
-  #   column(6,numericInput("lonmax","Max. Longitude",value =  10,min = -90,max = 90)),
-  # ),
+  fluidRow(
+    column(6,numericInput("latmin","Min. Latitude",value =  -55,min = -90,max = 90)),
+    column(6,numericInput("latmax","Max. Latitude",value =   35,min = -90,max = 90)),
+  ),
+  fluidRow(
+    column(6,numericInput("lonmin","Min. Longitude",value =-115,min = -90,max = 90)),
+    column(6,numericInput("lonmax","Max. Longitude",value = -25,min = -90,max = 90)),
+  ),
   selectInput("plot_method","Plot Method",selected = 4,
               choices = list("Higher quality"=1,"Lower quality"=2,
                              "Higher velocity"=3,"Automatic"=4)),

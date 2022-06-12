@@ -187,7 +187,8 @@ update_select_remove_all <- function(hours,last,inputID){
   }
 }
 
-inputs_summary <- function(daterange,inp_hours,inp_mins,channel){
+inputs_summary <- function(daterange,inp_hours,inp_mins,channel,
+                           latmin,latmax,lonmin,lonmax){
   # channel info
   channel_text <- channels_names(as.numeric(channel))
   channel_code <- channels_code[[which(names(channels_code) == channel_text)]]
@@ -206,10 +207,14 @@ inputs_summary <- function(daterange,inp_hours,inp_mins,channel){
   ftp <- "http://ftp.cptec.inpe.br/goes/goes16/retangular/"
   files_urls <- str_c(ftp,str_remove(channel_text,"_"),"/",str_sub(datetime_names,1,4),
                     "/",str_sub(datetime_names,5,6),"/",files_names)
+  # limits info
+  xlim <- c(lonmin,lonmax)
+  ylim <- c(latmin,latmax)
   return(list(channel_text=channel_text,channel_code=channel_code,
               dates=dates,hours=hours,mins=mins,datetime_names=datetime_names,
-              dates4title=dates4title,n_files=n_files,
-              files_names=files_names,files_paths=files_paths,files_urls=files_urls
+              dates4title=dates4title,
+              files_names=files_names,files_paths=files_paths,files_urls=files_urls,
+              xlim=xlim,ylim=ylim,n_files=n_files
               ))
   
 }
@@ -237,8 +242,8 @@ update_inputs_summary <- function(inputs_summary){
   # index <- sort(c(which(index_path),which(!index_path)[index_url]))
   # update inputs_summary with only available files
   updated_inputs_summary <- inputs_summary
-  updated_inputs_summary$channel_text   <- inputs_summary$channel_text[index]
-  updated_inputs_summary$channel_code   <- inputs_summary$channel_code[index]
+  # updated_inputs_summary$channel_text   <- inputs_summary$channel_text[index]
+  # updated_inputs_summary$channel_code   <- inputs_summary$channel_code[index]
   updated_inputs_summary$dates          <- inputs_summary$dates[index]
   updated_inputs_summary$hours          <- inputs_summary$hours[index]
   updated_inputs_summary$mins           <- inputs_summary$mins[index]
@@ -277,8 +282,8 @@ download_and_read_image <- function(imagery_info,image,channel,plot_method){
       if(as.numeric(channel) >= 7) data_prov_values <- data_prov_values - 273.15
       i_s <- (which((data_prov$lon - (-80)) >= 0)[1]):(max(which((data_prov$lon - (-60)) <= 0)))
       j_s <- (which((data_prov$lat - (-20)) >= 0)[1]):(max(which((data_prov$lat - 0) <= 0)))
-      # i_s <- (which((data_prov$lon - xlim[1]) >= 0)[1]):(max(which((data_prov$lon - xlim[2]) <= 0)))
-      # j_s <- (which((data_prov$lat - ylim[1]) >= 0)[1]):(max(which((data_prov$lat - ylim[2]) <= 0)))
+      i_s <- (which((data_prov$lon - imagery_info$xlim[1]) >= 0)[1]):(max(which((data_prov$lon - imagery_info$xlim[2]) <= 0)))
+      j_s <- (which((data_prov$lat - imagery_info$ylim[1]) >= 0)[1]):(max(which((data_prov$lat - imagery_info$ylim[2]) <= 0)))
       final_data <- list(values = data_prov_values[i_s,j_s],
                          lon = data_prov$lon[i_s],lat=data_prov$lat[j_s])
     }else{ 
@@ -334,8 +339,10 @@ make_plot <- function(goes_data,plot_info,title){
                main = pula_linha(title),
                xlab = "Longitude",
                ylab = "Latitude",
-               xlim = c(-80,-60),
-               ylim = c(-20,0),
+               xlim = plot_info$xlim,
+               ylim = plot_info$ylim,
+               # xlim = c(-80,-60),
+               # ylim = c(-20,0),
                zlim = plot_info$zlim)
     map("world", add = TRUE, col = "white")
   } else {
@@ -347,8 +354,10 @@ make_plot <- function(goes_data,plot_info,title){
                main = pula_linha(title),
                xlab = "Longitude",
                ylab = "Latitude",
-               xlim = c(-80,-60),
-               ylim = c(-20,0),
+               xlim = plot_info$xlim,
+               ylim = plot_info$ylim,
+               # xlim = c(-80,-60),
+               # ylim = c(-20,0),
                zlim = plot_info$zlim)
     map("world", add = TRUE, col = "white")
   }

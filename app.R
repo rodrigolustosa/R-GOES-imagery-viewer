@@ -81,7 +81,8 @@ server <- function(input, output) {
   
   # imagery inputs summary
   imagery_info <- eventReactive(input$update,{
-    imagery_info_prov <- inputs_summary(input$dates,input$hours,input$min,input$channel)
+    imagery_info_prov <- inputs_summary(input$dates,input$hours,input$min,input$channel,
+                                        input$latmin,input$latmax,input$lonmin,input$lonmax)
     # exclude files after the last available
     update_inputs_summary(imagery_info_prov)
   },ignoreNULL = FALSE)
@@ -98,7 +99,11 @@ server <- function(input, output) {
   },ignoreNULL = FALSE)
   # palette initialization
   plot_info <- eventReactive(input$update,{
-    get_palette(input$channel)
+    plot_info_prov <- get_palette(input$channel)
+    
+    plot_info_prov <- append(plot_info_prov,
+                             list(xlim=imagery_info()$xlim,
+                                  ylim=imagery_info()$ylim))
   },ignoreNULL = FALSE)
   # title plot
   title <- eventReactive(input$update,{
@@ -116,7 +121,9 @@ server <- function(input, output) {
   }) %>% bindCache(file.exists(imagery_info()$files_paths[input$image]),
                    imagery_info()$datetime_names[input$image],
                    isolate(input$channel),
-                   isolate(input$plot_method)
+                   isolate(input$plot_method),
+                   imagery_info()$xlim,
+                   imagery_info()$ylim
                    )
 
 
