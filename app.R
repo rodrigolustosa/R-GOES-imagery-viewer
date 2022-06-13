@@ -39,7 +39,7 @@ ui <- fluidPage(
   # Tabs
   tabsetPanel(
     # Viewer
-    tabPanel("Viewer [under develop.]",
+    tabPanel("Viewer",
              sidebarLayout(sidebar_inputs,plot_panel)
              ),
     # Download Tab
@@ -115,14 +115,14 @@ server <- function(input, output) {
     delta_x <- imagery_info()$xlim[2] - imagery_info()$xlim[1]
     delta_y <- imagery_info()$ylim[2] - imagery_info()$ylim[1]
     if(delta_x >= delta_y) {
-      plot.height = 600
+      plot.height = 550
       plot.width = plot.height/delta_y*delta_x
       if(plot.width > 900){
         plot.width = 900
         plot.height = plot.width/delta_x*delta_y
       }
     }else{
-      plot.width = 600
+      plot.width = 550
       plot.height = plot.width/delta_x*delta_y
       if(plot.height > 900){
         plot.height = 900
