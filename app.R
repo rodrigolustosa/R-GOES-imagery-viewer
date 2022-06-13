@@ -22,7 +22,7 @@ file_objects <- "R/objects.R"
 file_chunks <- "R/layout_chunks.R"
 
 # initialization
-app_version <- "Version 0.0.0"
+app_version <- "Version 0.1.0"
 licence <- "Copyright (c) 2022 Rodrigo Lustosa"
 
 # source functions and objects
