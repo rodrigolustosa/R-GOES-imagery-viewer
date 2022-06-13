@@ -59,6 +59,7 @@ Is there any tool or feature you would like to see in this app? (even if it's al
 - [ ] secondary tab inside `Viewer`: Scatter diagrams for supervised cloud classification
 - [ ] change animation velocity
 - [ ] color palette selection
+- [ ] View images in an interactive map (like Open Street Map)
 
 #### Tools:
 - [X] secondary tab for download only
