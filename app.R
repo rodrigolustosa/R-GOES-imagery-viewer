@@ -111,20 +111,42 @@ server <- function(input, output) {
   },ignoreNULL = FALSE)
 
   # plot
-  # inputs: update; channel, image, area_name, dates, hours, min
+  output$plot_ui <- renderUI({
+    delta_x <- imagery_info()$xlim[2] - imagery_info()$xlim[1]
+    delta_y <- imagery_info()$ylim[2] - imagery_info()$ylim[1]
+    if(delta_x >= delta_y) {
+      plot.height = 600
+      plot.width = plot.height/delta_y*delta_x
+      if(plot.width > 900){
+        plot.width = 900
+        plot.height = plot.width/delta_x*delta_y
+      }
+    }else{
+      plot.width = 600
+      plot.height = plot.width/delta_x*delta_y
+      if(plot.height > 900){
+        plot.height = 900
+        plot.width = plot.height/delta_y*delta_x
+      }
+    }
+    plotOutput('plot', width = plot.width, height = plot.height)
+    
+  })
   output$plot <- renderPlot({
     input$update
     input$image
+    # plot(1:10,1:10)
     make_plot(isolate({goes_data()}),
               isolate({plot_info()}),
               isolate({title()[input$image]}))
-  }) %>% bindCache(file.exists(imagery_info()$files_paths[input$image]),
-                   imagery_info()$datetime_names[input$image],
-                   isolate(input$channel),
-                   isolate(input$plot_method),
-                   imagery_info()$xlim,
-                   imagery_info()$ylim
-                   )
+  }) %>% 
+    bindCache(file.exists(imagery_info()$files_paths[input$image]),
+              imagery_info()$datetime_names[input$image],
+              isolate(input$channel),
+              isolate(input$plot_method),
+              imagery_info()$xlim,
+              imagery_info()$ylim
+    )
 
 
   # output$test <- renderText({imagery_info()$n_files})

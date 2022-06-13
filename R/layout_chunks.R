@@ -59,7 +59,8 @@ sidebar_inputs <- sidebarPanel(
                                         choices = list("Air Mass"  = 1))))
   ),
   # date range
-  dateRangeInput("dates","Date Range"#,start = "2022-06-10",end = "2022-06-10"
+  dateRangeInput("dates","Date Range",
+                 start = date(now(tzone = "UTC")),end = date(now(tzone = "UTC"))
   ),
   # check if you want to see time adjustments
   checkboxInput("show_time",label = "Show time selection",value = FALSE),
@@ -69,7 +70,7 @@ sidebar_inputs <- sidebarPanel(
     fluidRow(
       column(8,
              checkboxGroupInput("hours",label = "Hours",#width = "50%",
-                                selected = 12:18,inline = TRUE,
+                                selected = 0:23,inline = TRUE,
                                 choices = list("00" =  0, "01"=  1,"02"=  2,"03"=  3,
                                                "04" =  4, "05"=  5,"06"=  6,"07"=  7,
                                                "08" =  8, "09"=  9,"10"= 10,"11"= 11,
@@ -79,7 +80,7 @@ sidebar_inputs <- sidebarPanel(
                                                "select all" = 24,"remove all" = 25))),
       column(4,
              checkboxGroupInput("min",label = "Minutes",#width = "50%",
-                                selected = 0,inline = TRUE,
+                                selected = 0:5,inline = TRUE,
                                 choices = list("00" = 0, "10" = 1,
                                                "20" = 2, "30" = 3,
                                                "40" = 4, "50" = 5)))
@@ -104,7 +105,8 @@ sidebar_inputs <- sidebarPanel(
 # Plot area
 plot_panel <- mainPanel(
   # main plot
-  plotOutput("plot"),
+  uiOutput('plot_ui'),
+  # plotOutput("plot",width = "auto"),
   # sidebar for animation and image selection
   sliderInput("image",label = "Image",
               animate = animationOptions(interval = 500),

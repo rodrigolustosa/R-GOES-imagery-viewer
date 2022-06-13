@@ -332,6 +332,7 @@ make_title <- function(channel,dates4title,area_name){
 make_plot <- function(goes_data,plot_info,title){
   if(length(goes_data) == 0)
     return()
+  par()
   if(goes_data$read_with_raster){
     image.plot(goes_data$data,
                col = plot_info$palette,
@@ -341,8 +342,6 @@ make_plot <- function(goes_data,plot_info,title){
                ylab = "Latitude",
                xlim = plot_info$xlim,
                ylim = plot_info$ylim,
-               # xlim = c(-80,-60),
-               # ylim = c(-20,0),
                zlim = plot_info$zlim)
     map("world", add = TRUE, col = "white")
   } else {
@@ -356,8 +355,6 @@ make_plot <- function(goes_data,plot_info,title){
                ylab = "Latitude",
                xlim = plot_info$xlim,
                ylim = plot_info$ylim,
-               # xlim = c(-80,-60),
-               # ylim = c(-20,0),
                zlim = plot_info$zlim)
     map("world", add = TRUE, col = "white")
   }
