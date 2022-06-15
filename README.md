@@ -12,7 +12,7 @@ For now, in this app you can download GOES-16 data from the [CPTEC/INPE FTP](htt
 (color palette from older CPTEC/INPE images)
 
 ## Requirements
-To use this app you need to have [R](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) in your computer (you can also try to copy and paste the scripts in Google Colab or similar but it wasn't tested yet) as well as the packages listed bellow. 
+To use this app you need to have [R](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) (both are free) in your computer (you can also try to copy and paste the scripts in Google Colab or similar but it wasn't tested yet) as well as the packages listed bellow. A comprehensive guide to install R and RStudio can be seen [here](https://rstudio-education.github.io/hopr/starting.html), for Windows, Mac and Linux. 
 
 ## How to download
 You can find all app versions in the [Tags](https://github.com/rodrigolustosa/GOES-imagery-viewer/tags) tab, where you can download them zipped. You can also right-click in the `Code` green tab and download it from there, or also clone the repository in your computer (if you are familiar with Git).
@@ -29,9 +29,17 @@ install.packages("raster")
 install.packages("fields")
 install.packages("maps")
 ```
+**If you are using Linux**, it is necessary to install some dependencies before trying to install packages ([this page](https://blog.zenggyu.com/en/post/2018-01-29/installing-r-r-packages-e-g-tidyverse-and-rstudio-on-ubuntu-linux/) shows everything you need to know about installing R, RStudio and packages). If you already have installed R (r-base), run the following code in your terminal:
+```
+sudo apt install r-base-dev
+sudo apt install libcurl4-openssl-dev libssl-dev libxml2-dev
+sudo add-apt-repository ppa:marutter/rrutter3.5
+sudo apt install libudunits2-dev libgdal-dev libgeos-dev libproj-dev libfontconfig1-dev
+```
+This will be enough to install packages using `install.packages` as shown before.
 
 ## How to start
-After installing R, RStudio and all packages and downloading (and unzipping) the app, you should open `app.R` file in RStudio (Make sure all files and folders that follow `app.R` are in the same directory as `app.R`). A green arrow followed by `Run App` button will be located on the right upper corner of the first panel. You can just click on it or also selecting the entire text script (`Ctrl+A`) and pressing `Ctrl+Enter`. 
+After installing R, RStudio and all packages and downloading (and unzipping) the app, you should open `app.R` file in RStudio (Make sure all files and folders that follow `app.R` are in the same directory as `app.R`). A green arrow followed by `Run App` button will be located on the right upper corner of the first panel. You can just click on it or also select the entire text script (`Ctrl+A`) and press `Ctrl+Enter`. 
 
 
 ## Sugestions and contributions
