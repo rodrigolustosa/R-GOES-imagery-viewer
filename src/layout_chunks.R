@@ -4,6 +4,7 @@
 # Creation date: 12 Jun 2022 12:04 (GMT -03)
 # ----------------------------------------------------------------------- #
 
+# dir_data <- "data"
 # fixing checkbox alignment. solution from: https://stackoverflow.com/a/46493086/14874374
 fix_checkbox_alignment <- 
   tags$head(

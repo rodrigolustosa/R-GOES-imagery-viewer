@@ -256,7 +256,7 @@ update_inputs_summary <- function(inputs_summary){
   return(updated_inputs_summary)
 }
 
-download_and_read_image <- function(imagery_info,image,channel,plot_method){
+download_and_read_image <- function(imagery_info,image,channel,plot_method,dir_data){
   plot_method <- as.numeric(plot_method)
   lim_pixels_subset_method <- -1
   # Automatic
@@ -269,7 +269,9 @@ download_and_read_image <- function(imagery_info,image,channel,plot_method){
   if(!file.exists(imagery_info$files_paths[image])){
     download_cptec_data(images_text=imagery_info$datetime_names[image],
                         channels=as.numeric(channel),
-                        dir_data=file.path(dir_data,"CPTEC/GOES16"))
+                        # dir_data=file.path("data/CPTEC/GOES16")
+                        dir_data=file.path(dir_data,"CPTEC/GOES16")
+                        )
   }
   # read data
   if(file.exists(imagery_info$files_paths[image])){

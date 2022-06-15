@@ -17,18 +17,18 @@ library(maps)
 
 # directory and file names
 dir_data <- "data"
-file_functions <- "R/functions.R"
-file_objects <- "R/objects.R"
-file_chunks <- "R/layout_chunks.R"
+file_functions <- "src/functions.R"
+file_objects <- "src/objects.R"
+file_chunks <- "src/layout_chunks.R"
 
 # initialization
-app_version <- "Version 0.1.0"
+app_version <- "Version 0.1.1"
 licence <- "Copyright (c) 2022 Rodrigo Lustosa"
 
 # source functions and objects
-source(file_functions)
 source(file_objects)
 source(file_chunks)
+source(file_functions)
 
 
 ui <- fluidPage(
@@ -95,7 +95,7 @@ server <- function(input, output) {
   # read data
   goes_data <- eventReactive(c(input$update,input$image),{
     download_and_read_image(imagery_info(),input$image,input$channel,
-                            input$plot_method)
+                            input$plot_method,dir_data=dir_data)
   },ignoreNULL = FALSE)
   # palette initialization
   plot_info <- eventReactive(input$update,{
