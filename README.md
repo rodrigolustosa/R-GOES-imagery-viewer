@@ -15,7 +15,7 @@ For now, in this app you can download GOES-16 data from the [CPTEC/INPE FTP](htt
 To use this app you need to have [R](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) in your computer (you can also try to copy and paste the scripts in Google Colab or similar but it wasn't tested yet) as well as the packages listed bellow. 
 
 ## How to download
-You can find all app versions (one for now) in the [Tags](https://github.com/rodrigolustosa/GOES-imagery-viewer/tags) tab, where you can download them zipped. You can also right-click in the `Code` green tab and download it from there, or also clone the repository in your computer (if you are familiar with Git).
+You can find all app versions in the [Tags](https://github.com/rodrigolustosa/GOES-imagery-viewer/tags) tab, where you can download them zipped. You can also right-click in the `Code` green tab and download it from there, or also clone the repository in your computer (if you are familiar with Git).
 
 ## Packages
 Some R packages were used to build this app (the most important one being Shiny, responsible for the entire page layout). You can download them executing the following code in your R console:
