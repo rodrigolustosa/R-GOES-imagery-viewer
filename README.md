@@ -15,7 +15,7 @@ For now, in this app you can download GOES-16 data from the [CPTEC/INPE FTP](htt
 To use this app you need to have [R](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) (both are free) in your computer (you can also try to copy and paste the scripts in Google Colab or similar but it wasn't tested yet) as well as the packages listed bellow. A comprehensive guide to install R and RStudio can be seen [here](https://rstudio-education.github.io/hopr/starting.html), for Windows, Mac and Linux. 
 
 ## How to download
-You can find all app versions in the [Tags](https://github.com/rodrigolustosa/GOES-imagery-viewer/tags) tab, where you can download them zipped. You can also right-click in the `Code` green tab and download it from there, or also clone the repository in your computer (if you are familiar with Git).
+You can find all app versions in the [Releases](https://github.com/rodrigolustosa/GOES-imagery-viewer/releases) (or also [Tags](https://github.com/rodrigolustosa/GOES-imagery-viewer/tags)) tab, where you can download them zipped. You can also right-click in the `Code` green tab and download it from there, or also clone the repository in your computer (if you are familiar with Git).
 
 ## Packages
 Some R packages were used to build this app (the most important one being Shiny, responsible for the entire page layout). You can download them executing the following code in your R console:
@@ -29,7 +29,7 @@ install.packages("raster")
 install.packages("fields")
 install.packages("maps")
 ```
-**If you are using Linux**, it is necessary to install some dependencies before trying to install packages ([this page](https://blog.zenggyu.com/en/post/2018-01-29/installing-r-r-packages-e-g-tidyverse-and-rstudio-on-ubuntu-linux/) shows everything you need to know about installing R, RStudio and packages). If you already have installed R (r-base), run the following code in your terminal:
+**If you are using Linux**, it is necessary to install some dependencies before trying to install packages ([this page](https://blog.zenggyu.com/en/post/2018-01-29/installing-r-r-packages-e-g-tidyverse-and-rstudio-on-ubuntu-linux/) shows everything you need to know about installing R, RStudio and packages in Linux). If you already have installed R (r-base), run the following code in your terminal:
 ```
 sudo apt install r-base-dev
 sudo apt install libcurl4-openssl-dev libssl-dev libxml2-dev
@@ -44,7 +44,7 @@ After installing R, RStudio and all packages and downloading (and unzipping) the
 
 ## Sugestions and contributions
 
-Is there any tool or feature you would like to see in this app? (even if it's already on the list bellow). Found a bug? Fell free to make suggestions and contributions, in English ou em português, in the [Issues](https://github.com/rodrigolustosa/GOES-imagery-viewer/issues) tab (or make a [Pull Request](https://github.com/rodrigolustosa/GOES-imagery-viewer/pulls)). You can also email me at <rodrigo.lustosa.repositorios@gmail.com>.
+Is there any tool or feature you would like to see in this app? (even if it's already on the list bellow, so I can know which is more necessary). Found a bug? Or did I misunderstand a concept? Or didn't you understand something? Fell free to make suggestions, questions and contributions, in English ou em português, in the [Issues](https://github.com/rodrigolustosa/GOES-imagery-viewer/issues) or [Discussions](https://github.com/rodrigolustosa/GOES-imagery-viewer/discussions) tabs (or make a [Pull Request](https://github.com/rodrigolustosa/GOES-imagery-viewer/pulls)). You can also email me at <rodrigo.lustosa.repositorios@gmail.com>.
 
 
 ## Features 
@@ -79,6 +79,16 @@ Is there any tool or feature you would like to see in this app? (even if it's al
 - [ ] Get coordinates and values by clicking on the map
 - [ ] cancel download button
 - [ ] Interactive option to draw boxes 
+  - [ ] by typing limits explicitly
+  - [ ] by drawing box on the plot with the mouse
+  - [ ] new boxes will be on a list
+  - [ ] boxes edition mode (limits, boxes names and boxes color can be edited, and boxes can be excluded)
+  - [ ] plots of boxes will be on new tabs (including supervised cloud classification diagrams)
+- [ ] Interactive option to draw paths (cuts)
+  - [ ] same as boxes
+  - [ ] export paths as .csv or text file
+  - [ ] path can be drawn in latitude/longitude projection or in the shortest distance
+- [ ] create Profiles (or Projects) so the user can save boxes and paths and reopen them in new session
 - [ ] time interval of older GOES-16 data was 15 minutes, not 10 minutes. Cover these images as well
 
 #### Different data sources:
@@ -98,9 +108,15 @@ Is there any tool or feature you would like to see in this app? (even if it's al
   - [ ] INPE Cloud Classification
   - [ ] GLM data
   
+#### Eficiency:
+- [ ] Sample points in plots according to limits without degrading image quality, but making plots faster
+
 #### Others:
 - [X] progress bar for download
 - [ ] add educational texts
+
+## Credits
+This project is based on the R scripts made to plot and analyse GOES-16 data used in the Satellite Meteorology course in 2019 at the Institute of Astronomy, Geophysics and Atmospheric Sciences of the University of São Paulo (IAG/USP) taught by teacher Rachel Albrecht and monitored by Raidiel Puig.
 
 ## License
 All code written in this repository is distributed under the MIT License. For more information read the License file.
