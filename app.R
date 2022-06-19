@@ -79,6 +79,15 @@ server <- function(input, output) {
     input_hours$last <- input$hours
   })
   
+  # Reset limits
+  observe({
+    input$reset_lim
+    updateNumericInput(inputId = "latmin", value = -55)
+    updateNumericInput(inputId = "latmax", value =  35)
+    updateNumericInput(inputId = "lonmin", value =-115)
+    updateNumericInput(inputId = "lonmax", value = -25)
+  })
+  
   # imagery inputs summary
   imagery_info <- eventReactive(input$update,{
     imagery_info_prov <- inputs_summary(input$dates,input$hours,input$min,input$channel,

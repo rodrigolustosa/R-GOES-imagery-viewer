@@ -93,14 +93,15 @@ sidebar_inputs <- sidebarPanel(
     column(6,numericInput("latmax","Max. Latitude",value =   35,min = -90,max = 90)),
   ),
   fluidRow(
-    column(6,numericInput("lonmin","Min. Longitude",value =-115,min = -90,max = 90)),
-    column(6,numericInput("lonmax","Max. Longitude",value = -25,min = -90,max = 90)),
+    column(6,numericInput("lonmin","Min. Longitude",value =-115,min = -180,max = 180)),
+    column(6,numericInput("lonmax","Max. Longitude",value = -25,min = -180,max = 180)),
   ),
   selectInput("plot_method","Plot Method",selected = 4,
               choices = list("Higher quality"=1,"Lower quality"=2,
                              "Higher velocity"=3,"Automatic"=4)),
   # update plot with previous information
-  fluidRow(column(12,actionButton("update","Update"),align="right"))
+  fluidRow(column(12,actionButton("reset_lim","Reset Limits"),
+                  actionButton("update","Update"),align="right"))
 )
 
 # Plot area
