@@ -60,7 +60,7 @@ Is there any tool or feature you would like to see in this app? (even if it's al
 - [ ] Different projections
   - [X] Latitude/Longitude
   - [ ] Geostationary
-- [ ] add plot units
+- [ ] add plot variables units
 - [ ] improve plot scale
 - [ ] Change plot dimensions
 - [ ] Change images title
