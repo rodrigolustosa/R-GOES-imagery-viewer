@@ -116,7 +116,7 @@ Is there any tool or feature you would like to see in this app? (even if it's al
 - [ ] add educational texts
 
 ## Credits
-This project is based on the R scripts made to plot and analyse GOES-16 data used in the Satellite Meteorology course in 2019 at the Institute of Astronomy, Geophysics and Atmospheric Sciences of the University of São Paulo (IAG/USP) taught by teacher Rachel Albrecht and monitored by Raidiel Puig.
+This project is based on the R scripts made to plot and analyse GOES-16 data used in the Satellite Meteorology course in 2019 at the Institute of Astronomy, Geophysics and Atmospheric Sciences of the University of São Paulo (IAG/USP) taught by professor Rachel Albrecht and monitored by Raidiel Puig.
 
 ## License
 All code written in this repository is distributed under the MIT License. For more information read the License file.
