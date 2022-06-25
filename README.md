@@ -1,4 +1,4 @@
-# GOES-imagery-viewer
+# R-GOES-imagery-viewer
 
 
 An interactive imagery viewer web app for the GOES satellites, widely used in meteorology for the Americas. Written in R language.
@@ -15,7 +15,7 @@ For now, in this app you can download GOES-16 data from the [CPTEC/INPE FTP](htt
 To use this app you need to have [R](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) (both are free) in your computer (you can also try to copy and paste the scripts in Google Colab or similar but it wasn't tested yet) as well as the packages listed bellow. A comprehensive guide to install R and RStudio can be seen [here](https://rstudio-education.github.io/hopr/starting.html), for Windows, Mac and Linux. 
 
 ## How to download
-You can find all app versions in the [Releases](https://github.com/rodrigolustosa/GOES-imagery-viewer/releases) (or also [Tags](https://github.com/rodrigolustosa/GOES-imagery-viewer/tags)) tab, where you can download them zipped. You can also right-click in the `Code` green tab and download it from there, or also clone the repository in your computer (if you are familiar with Git).
+You can find all app versions in the [Releases](https://github.com/rodrigolustosa/R-GOES-imagery-viewer/releases) (or also [Tags](https://github.com/rodrigolustosa/R-GOES-imagery-viewer/tags)) tab, where you can download them zipped. You can also right-click in the `Code` green tab and download it from there, or also clone the repository in your computer (if you are familiar with Git).
 
 ## Packages
 Some R packages were used to build this app (the most important one being Shiny, responsible for the entire page layout). You can download them executing the following code in your R console:
@@ -44,7 +44,7 @@ After installing R, RStudio and all packages and downloading (and unzipping) the
 
 ## Sugestions and contributions
 
-Is there any tool or feature you would like to see in this app? (even if it's already on the list bellow, so I can know which is more necessary). Found a bug? Or did I misunderstand a concept? Or didn't you understand something? Fell free to make suggestions, questions and contributions, in English ou em português, in the [Issues](https://github.com/rodrigolustosa/GOES-imagery-viewer/issues) or [Discussions](https://github.com/rodrigolustosa/GOES-imagery-viewer/discussions) tabs (or make a [Pull Request](https://github.com/rodrigolustosa/GOES-imagery-viewer/pulls)). You can also email me at <rodrigo.lustosa.repositorios@gmail.com>.
+Is there any tool or feature you would like to see in this app? (even if it's already on the list bellow, so I can know which is more necessary). Found a bug? Or did I misunderstand a concept? Or didn't you understand something? Fell free to make suggestions, questions and contributions, in English ou em português, in the [Issues](https://github.com/rodrigolustosa/R-GOES-imagery-viewer/issues) or [Discussions](https://github.com/rodrigolustosa/R-GOES-imagery-viewer/discussions) tabs (or make a [Pull Request](https://github.com/rodrigolustosa/R-GOES-imagery-viewer/pulls)). You can also email me at <rodrigo.lustosa.repositorios@gmail.com>.
 
 
 ## Features 
